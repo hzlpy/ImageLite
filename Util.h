@@ -20,5 +20,7 @@ public:
 	string q2s(const QString &qs);
 	//cv::Mat ×ª»»Îª QImage
 	QImage Mat2QImage(const Mat &mat);
+	//
+	void getScaledRatio(int image_width, int image_height, int label_width, int label_height, int *scaled_width, int *scaled_height);
 };
 

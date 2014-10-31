@@ -72,3 +72,21 @@ QImage Util::Mat2QImage(const Mat &mat)
 		return QImage();
 	}
 }
+
+void Util::getScaledRatio(int image_width, int image_height, int label_width, int label_height, int *scaled_width, int *scaled_height)
+{
+	double scaled_ratio = 0;
+	double label_ratio = label_width * 1.0 / label_height;
+	double image_ratio = image_width * 1.0 / image_height;
+
+	if (label_ratio > image_ratio)
+	{
+		*scaled_width = (int)(label_height * image_ratio);
+		*scaled_height = label_height;
+	} 
+	else
+	{
+		*scaled_width = label_width;
+		*scaled_height = (int)(label_width / image_ratio);
+	}
+}
