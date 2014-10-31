@@ -4,14 +4,11 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
 	ui.setupUi(this);
-
 	/*初始化*/
 	init();
-
 	/*connect*/
 	connect(ui.action,SIGNAL(triggered()),this,SLOT(slotOpenDirectory()));
 	connect(this,SIGNAL(signalShowImageList()),this,SLOT(slotShowImageList()));
-
 	/*选定影像，并显示*/
 	connect(ui.treeWidget,SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),this,SLOT(slotShowSelectedImage(QTreeWidgetItem*, int)));
 	/*特征提取，并显示结果*/
@@ -134,7 +131,14 @@ void MainWindow::showLeftImage()
 	Mat mat = leftImageMat.clone();
 	QImage qimg = util.Mat2QImage(mat);
 	ui.label->clear();
-	ui.label->setPixmap(QPixmap::fromImage(qimg));
+	int label_width = ui.label->width();
+	int label_height = ui.label->height();
+	int image_width = qimg.width();
+	int image_height = qimg.height();
+	int scaled_width, scaled_height;
+	util.getScaledRatio(image_width,image_height,label_width,label_height,&scaled_width,&scaled_height);
+
+	ui.label->setPixmap(QPixmap::fromImage(qimg).scaled(scaled_width,scaled_height,Qt::KeepAspectRatio));
 }
 /*****************************************************************************
     *  @brief    : showRightImage 显示右侧图像
@@ -149,7 +153,15 @@ void MainWindow::showRightImage()
 	Mat mat = rightImageMat.clone();
 	QImage qimg = util.Mat2QImage(mat);
 	ui.label_2->clear();
-	ui.label_2->setPixmap(QPixmap::fromImage(qimg));
+
+	int label_width = ui.label_2->width();
+	int label_height = ui.label_2->height();
+	int image_width = qimg.width();
+	int image_height = qimg.height();
+	int scaled_width, scaled_height;
+	util.getScaledRatio(image_width,image_height,label_width,label_height,&scaled_width,&scaled_height);
+
+	ui.label_2->setPixmap(QPixmap::fromImage(qimg).scaled(scaled_width,scaled_height,Qt::KeepAspectRatio));
 }
 /*****************************************************************************
     *  @brief    : showLeftImageFeature 显示特征点
@@ -165,8 +177,16 @@ void MainWindow::showLeftImageFeature()
 	/*把特征点和原影像显示出来*/
 	drawKeypoints(warpImageMat,leftImageKeyPoints,warpImageMat,Scalar(0,0,255));//把特征点画在影像上
 	QImage qimg = util.Mat2QImage(warpImageMat); //将Mat转换为QImage
+
+	int label_width = ui.label_3->width();
+	int label_height = ui.label_3->height();
+	int image_width = qimg.width();
+	int image_height = qimg.height();
+	int scaled_width, scaled_height;
+	util.getScaledRatio(image_width,image_height,label_width,label_height,&scaled_width,&scaled_height);
+
 	ui.label_3->clear();
-	ui.label_3->setPixmap(QPixmap::fromImage(qimg));
+	ui.label_3->setPixmap(QPixmap::fromImage(qimg).scaled(scaled_width,scaled_height,Qt::KeepAspectRatio));
 }
 /*****************************************************************************
     *  @brief    : showRightImageFeature 显示特征点
@@ -182,8 +202,16 @@ void MainWindow::showRightImageFeature()
 	/*把特征点和原影像显示出来*/
 	drawKeypoints(referImageMat,rightImageKeyPoints,referImageMat,Scalar(0,255,0));//把特征点画在影像上
 	QImage qimg = util.Mat2QImage(referImageMat); //将Mat转换为QImage
+
+	int label_width = ui.label_4->width();
+	int label_height = ui.label_4->height();
+	int image_width = qimg.width();
+	int image_height = qimg.height();
+	int scaled_width, scaled_height;
+	util.getScaledRatio(image_width,image_height,label_width,label_height,&scaled_width,&scaled_height);
+
 	ui.label_4->clear();
-	ui.label_4->setPixmap(QPixmap::fromImage(qimg));
+	ui.label_4->setPixmap(QPixmap::fromImage(qimg).scaled(scaled_width,scaled_height,Qt::KeepAspectRatio));
 }
 /*****************************************************************************
     *  @brief    : showMatching 显示匹配结果
@@ -197,9 +225,17 @@ void MainWindow::showMatching()
 {
 	Mat matchImage = matchMat.clone();//克隆一个匹配结果matchMat副本，用于后续操作
 	QImage qimg = util.Mat2QImage(matchImage); 
+
+	int label_width = ui.label_5->width();
+	int label_height = ui.label_5->height();
+	int image_width = qimg.width();
+	int image_height = qimg.height();
+	int scaled_width, scaled_height;
+	util.getScaledRatio(image_width,image_height,label_width,label_height,&scaled_width,&scaled_height);
+	qDebug() << "label_5 " <<scaled_height << scaled_width << endl;
 	ui.label_5->clear();
-	ui.label_5->setPixmap(QPixmap::fromImage(qimg));
-	
+	ui.label_5->setPixmap(QPixmap::fromImage(qimg).scaled(scaled_width,scaled_height,Qt::KeepAspectRatio));
+	ui.label_5->setGeometry((label_width-scaled_width)/2,1,scaled_width,label_height);
 }
 /*****************************************************************************
     *  @brief    : showAlignment 显示最后的拼接结果
@@ -213,9 +249,17 @@ void MainWindow::showAlignment()
 {
 	Mat alignMat = alignResult.clone();
 	QImage qimg = util.Mat2QImage(alignMat);
+
+	int label_width = ui.label_6->width();
+	int label_height = ui.label_6->height();
+	int image_width = qimg.width();
+	int image_height = qimg.height();
+	int scaled_width, scaled_height;
+	util.getScaledRatio(image_width,image_height,label_width,label_height,&scaled_width,&scaled_height);
+	qDebug() << "label_6 " <<scaled_height << scaled_width << endl;
 	ui.label_6->clear();
-	qimg.scaled(ui.label_6->width(),ui.label_6->height());
-	ui.label_6->setPixmap(QPixmap::fromImage(qimg));
+	ui.label_6->setPixmap(QPixmap::fromImage(qimg).scaled(scaled_width,scaled_height,Qt::KeepAspectRatio));
+	ui.label_6->setGeometry((label_width-scaled_width)/2,1,scaled_width,label_height);
 }
 
 						/************************************************************************/
