@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(this,SIGNAL(signalShowConsole()),this,SLOT(slotShowConsole()));
 
 	connect(ui.action_2,SIGNAL(triggered()),this,SLOT(slotViewAlignment()));
+	connect(ui.action_3,SIGNAL(triggered()),this,SLOT(slotSave()));
 }
 
 MainWindow::~MainWindow()
@@ -59,6 +60,15 @@ void MainWindow::init()
 	alfa = 0;
 	lambda = 0;
 	folderPath = "";
+
+	/*初始化操作标志为false*/
+	isOpenFlag = false;
+	isSelectedImageFlag = false;
+	isOverlapFlag = false;
+	isExtractedFlag = false;
+	isMatchedFlag = false;
+	isAlignedFlag = false;
+	controlGUI(0);
 }
 
 /*****************************************************************************
@@ -284,7 +294,7 @@ void MainWindow::slotOpenDirectory()
 	consoleText = "打开 "+folderPath+" 目录";
 	signalShowConsole();
 	signalShowImageList();
-	
+	isOpenFlag = true;//文件目录已经打开
 }
 
 /*****************************************************************************
@@ -331,6 +341,8 @@ void MainWindow::slotShowSelectedImage(QTreeWidgetItem * qTreeWidgetItem, int co
 	}
 	signalShowConsole();
 	ui.tabWidget->setCurrentIndex(0);
+	isSelectedImageFlag = true;
+	controlGUI(2);
 }
 
 /*****************************************************************************
@@ -369,6 +381,8 @@ void MainWindow::slotExtractFeature()
 	consoleText = "显示特征..";
 	//发出显示控制台输出信号
 	signalShowConsole();
+	isExtractedFlag = true;//经过提取特征
+	controlGUI(3);
 }
 
 /*****************************************************************************
@@ -395,6 +409,8 @@ void MainWindow::slotMatchFeature()
 	signalShowMatching();
 	consoleText = "显示匹配结果..";
 	signalShowConsole();
+	isMatchedFlag = true;//经过匹配特征
+	controlGUI(4);
 }
 
 void MainWindow::slotAlignImage()
@@ -406,7 +422,9 @@ void MainWindow::slotAlignImage()
 	//imageProcess.alignImage();
 	this->alignResult = imageProcess.alignResult;
 	//发出显示拼接结果信号
-	signalShowAlignment();
+	emit signalShowAlignment();
+	isAlignedFlag = true;	//经过对齐影像
+	controlGUI(5);
 }
 /*****************************************************************************
     *  @brief    : slotShowFeaturePoint
@@ -465,4 +483,103 @@ void MainWindow::slotShowConsole()
 void MainWindow::slotViewAlignment()
 {
 	imshow("",graphcut);
+}
+
+void MainWindow::slotSave()
+{
+	//通过判断当前显示的是哪一个tab来确定保存哪里的结果
+	int index = ui.tabWidget->currentIndex();
+	//弹出保存对话框
+	QString qFileName;
+	
+	qFileName = QFileDialog::getSaveFileName(this,tr("保存文件"), "", tr("Image Files (*.png *.jpg *.bmp)"));
+	if (!qFileName.isNull()) //如果文件名非空，表示正在等待保存
+	{
+		//保存
+		imageProcess.saveResult(index,util.q2s(qFileName));
+	} 
+	else
+	{
+		return;
+	}
+	consoleText = "文件保存完成";
+	emit signalShowConsole();
+}
+/*****************************************************************************
+    *  @brief    : controlGUI
+    *  @author   : Zhangle
+    *  @date     : 2014/11/3 10:25
+    *  @version  : ver 1.0
+    *  @inparam  : 
+    *  @outparam :  
+	*  1.未经过打开文件目录，其他按钮不能操作，state = 0；
+	*  2.未选择影像，不能进行影像操作，state = 1；
+	*  3.已选择影像，state = 2；
+	*  4.已选择影像，经过特征提取，state = 3；
+	*  5.已选择影像，经过特征提取，经过特征匹配，state = 4；
+	*  6.已选择影像，经过特征提取，经过特征匹配，经过影像对齐，state = 5；
+*****************************************************************************/
+void MainWindow::controlGUI(int state)
+{
+	switch (state)
+	{
+	case 0: //未打开文件目录
+		/*action不可用*/
+		ui.action_3->setDisabled(true);
+		ui.action_4->setDisabled(true);
+		ui.action_2->setDisabled(true);
+		/*button不可用*/
+		ui.pushButton->setDisabled(true);
+		ui.pushButton_2->setDisabled(true);
+		ui.pushButton_3->setDisabled(true);
+		break;
+	case 1:	//未选择影像
+		/*action不可用*/
+		ui.action_3->setDisabled(true);
+		ui.action_4->setDisabled(true);
+		ui.action_2->setDisabled(true);
+		/*button不可用*/
+		ui.pushButton->setDisabled(true);
+		ui.pushButton_2->setDisabled(true);
+		ui.pushButton_3->setDisabled(true);
+		break;
+	case 2: //未提取特征
+		/*action可用*/
+		ui.action_3->setDisabled(false);
+		//ui.action_4->setDisabled(false);
+		//ui.action_2->setDisabled(false);
+
+		ui.pushButton->setDisabled(false);			//特征提取按钮可用
+		break;
+	case 3: //未匹配特征
+		/*action可用*/
+		ui.action_3->setDisabled(false);
+		//ui.action_4->setDisabled(false);
+		//ui.action_2->setDisabled(false);
+
+		ui.pushButton->setDisabled(false);			//特征提取按钮可用
+		ui.pushButton_2->setDisabled(false);		//特征匹配按钮可用
+		break;
+	case 4: //未对齐影像
+		/*action可用*/
+		ui.action_3->setDisabled(false);
+		ui.action_4->setDisabled(false);
+		ui.action_2->setDisabled(false);
+
+		ui.pushButton->setDisabled(false);			//特征提取按钮可用
+		ui.pushButton_2->setDisabled(false);		//特征匹配按钮可用
+		ui.pushButton_3->setDisabled(false);		//影像对齐按钮可用
+		break;
+	case 5:
+		/*action可用*/
+		ui.action_3->setDisabled(false);
+		ui.action_4->setDisabled(false);
+		ui.action_2->setDisabled(false);
+
+		ui.pushButton->setDisabled(false);			//特征提取按钮可用
+		ui.pushButton_2->setDisabled(false);		//特征匹配按钮可用
+		ui.pushButton_3->setDisabled(false);		//影像对齐按钮可用
+		break;
+	}
+
 }

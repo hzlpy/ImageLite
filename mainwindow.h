@@ -38,6 +38,15 @@ public:
 	//显示拼接结果
 	void showAlignment();
 
+	/*界面显示的逻辑控制*/
+	//1.未经过打开文件目录，其他按钮不能操作，state = 0
+	//2.未选择影像，不能进行影像操作，state = 1
+	//3.已选择影像，state = 2;
+	//4.已选择影像，经过特征提取，state = 3;
+	//5.已选择影像，经过特征提取，经过特征匹配，state = 4;
+	//6.已选择影像，经过特征提取，经过特征匹配，经过影像对齐，state = 5;
+	void controlGUI(int state);
+
 	private slots:
 		//打开指定文件夹
 		void slotOpenDirectory();
@@ -61,7 +70,9 @@ public:
 		void slotShowConsole();
 		//显示对齐结果(action)
 		void slotViewAlignment();
-
+		//保存结果
+		void slotSave();
+		
 signals:
 		//显示影像列表信号
 		void signalShowImageList();
@@ -113,6 +124,16 @@ private:
 	/************************************************************************/
 	QString folderPath;
 	QString consoleText;					//控制台文本内容
+
+	/************************************************************************/
+	/*							操作标志                                     */
+	/************************************************************************/
+	bool isOpenFlag;						//true表示已经打开文件目录
+	bool isSelectedImageFlag;				//true表示已经选择影像
+	bool isOverlapFlag;						//true表示选择的两张影像有重叠区域
+	bool isExtractedFlag;					//ture表示已经提取特征
+	bool isMatchedFlag;						//true表示已经匹配特征
+	bool isAlignedFlag;						//true表示已经对齐影像
 };
 
 #endif // MAINWINDOW_H
