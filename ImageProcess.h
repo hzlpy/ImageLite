@@ -48,6 +48,8 @@ public:
 	void alignbyPTIS();
 	//用SDIS方法对齐
 	void alignbySDIS();
+	//保存第i的tab处理结果，文件名为fileName
+	void saveResult(int, string fileName);
 
 private:
 	Stitcher stitcher;

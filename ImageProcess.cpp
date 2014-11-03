@@ -119,3 +119,34 @@ void ImageProcess::run()
 		break;
 	}
 }
+/*****************************************************************************
+    *  @brief    : saveResult 保存结果
+    *  @author   : Zhangle
+    *  @date     : 2014/11/3 9:26
+    *  @version  : ver 1.0
+    *  @inparam  : 
+    *  @outparam :  
+*****************************************************************************/
+void ImageProcess::saveResult(int i, string fileName)
+{
+	Mat savingMat;		//声明一个存放待保存数据的变量
+	switch (i)
+	{
+	case 0:		//此时表示tabwidget中显示的是第1个tab，第1个tab中显示的是打开的原始影像
+		//原始影像不需要保存
+		break;
+	case 1:		//此时表示tabwidget中显示的是第2个tab，第2个tab中显示的是提取特征后的结果
+		//保存提取特征后的结果
+		break;
+	case 2:		//此时表示tabwidget中显示的是第3个tab，第3个tab中显示的是匹配特征后的结果
+		//保存匹配特征后的结果
+		savingMat = matchMat.clone();
+		break;
+	case 3:		//此时表示tabwidget中显示的是第4个tab，第4个tab中显示的是对齐后的结果
+		//保存影像对齐后的结果
+		savingMat = alignResult.clone();
+		break;
+	}
+	//写入文件
+	imwrite(fileName,savingMat);
+}
